@@ -2,8 +2,9 @@ from datetime import datetime
 from bson import ObjectId
 from pymongo import MongoClient
 from passlib.hash import bcrypt
-from static.user import User
-from static.room import Room
+from chat_websocket.static.user import User
+from chat_websocket.static.room import Room
+#from static.room import Room
 
 class DbUser:
 

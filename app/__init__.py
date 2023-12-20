@@ -1,14 +1,14 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+#from fastapi import FastAPI
+#from fastapi.staticfiles import StaticFiles
 
-from .server import server_router
+#from .server import server_router
 
-app = FastAPI()
+#app = FastAPI()
 
-app.mount(
-    '/static',
-    StaticFiles(directory='static'),
-    name='static'
-)
+#app.mount(
+#    '/static',
+#    StaticFiles(directory='static'),
+#    name='static'
+#)
 
-app.include_router(server_router)
+#app.include_router(server_router)
