@@ -1,41 +1,26 @@
+from datetime import datetime
+
+from bson.json_util import dumps
 from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, join_room
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_socketio import SocketIO, join_room, leave_room
+from pymongo.errors import DuplicateKeyError
+
+from db.db import DbUser, DbRoom
 from flask_login import current_user, login_user, login_required, logout_user, LoginManager
 
 app = Flask(__name__)
 app.secret_key = "sfdjkafnk"
 socketio = SocketIO(app)
-login_manager = LoginManager()
-login_manager.login_view = 'login'
-login_manager.init_app(app)
 
 @app.route('/')
 def home():
-    return render_template("index.html")
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
 
-    message = ''
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password_input = request.form.get('password')
-        user = get_user(username)
-
-        if user and user.check_password(password_input):
-            login_user(user)
-            return redirect(url_for('home'))
-        else:
-            message = 'Failed to login!'
-    return render_template('login.html', message=message)
-
-@app.route("/logout/")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
+    rooms = []
+    if current_user.is_authenticated():
+        rooms = db_room.get_rooms_for_user(current_user.username)
+    return render_template("index.html", rooms=rooms)
 
 @app.route('/chat')
 def chat():
@@ -48,6 +33,55 @@ def chat():
         return redirect(url_for('home'))
     
 
+    message = ''
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        try:
+            db_user.insert_user(str(username), str(password))
+            return redirect(url_for('login'))
+        except DuplicateKeyError:
+            message = "Usuario ja cadastrado!"
+    return render_template('signup.html', message=message)
+
+
+@app.route("/logout/")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+
+@app.route('/create-room/', methods=['GET', 'POST'])
+@login_required
+def create_room():
+    message = ''
+    if request.method == 'POST':
+        room_number = request.form.get('numero_sala')
+        usernames = [username.strip() for username in request.form.get('members').split(',')]
+
+        if room_number and len(usernames):
+            room_id = db_room.add_room_chat(int(room_number), current_user.username)
+            if current_user.username in usernames:
+                usernames.remove(current_user.username)
+            db_room.add_room_users(room_id, int(room_number), usernames)
+            return redirect(url_for('view_room', room_id=room_id))
+        else:
+            message = "Nao foi possivel criar a sala"
+    return render_template('create_room.html', message=message)
+
+
+@app.route('/rooms/<room_id>/')
+@login_required
+def view_room(room_id):
+    room = db_room.get_room(room_id)
+    if room and db_room.is_room_member(room_id, current_user.username):
+        room_members = db_room.get_room_members(room_id)
+        return render_template('view_room.html', username=current_user.username, room=room, room_members=room_members)
+    else:
+        return "Room not found", 404
+
 @socketio.on('send_message')
 def hendle_send_message_event(data):
     app.logger.info("{} has sent message to the room {}: {}".format(data['username'], data['room'], data['message']))
@@ -59,16 +93,6 @@ def handle_join_room_event(data):
     app.logger.info("{} has joined the room {}".format(data['username'], data['room']))
     join_room(data['room'])
     socketio.emit('join_room_anouncement', data)
-
-@socketio.on('leave_room')
-def handle_leave_room_event(data):
-    app.logger.info("{} has left the room {}".format(data['username'], data['room']))
-    leave_room(data['room'])
-    socketio.emit('leave_room_announcement', data, room=data['room'])
-
-@login_manager.user_loader
-def load_user(username):
-    return get_user(username)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
