@@ -1,0 +1,4 @@
+Olá, abaixo encontra-se os links do repositório e da apresentação com o resultado do nosso projeto. No repositório, pode ser encontrado o vídeo de apresentação e demais arquivos de configurações e scripts. 
+
+Link para o Repositório: https://github.com/douglasffcastro/chat_websocket
+Link da apresentação: https://www.canva.com/design/DAF3kqknwLg/e2AOUVyGYuaImDjrIQqtbg/edit?utm_content=DAF3kqknwLg&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
