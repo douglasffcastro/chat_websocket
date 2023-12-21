@@ -1,20 +1,21 @@
 [tool.poetry]
-name = "lChat WebSocket"
-version = "1.0"
+name = "chat-frc"
+version = "0.1.0"
 description = ""
-authors = [""]
+authors = ["frmiza <mizzaelsantos1@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.63.0"
-uvicorn = {extras = ["standard"], version = "^0.13.4"}
-Jinja2 = "^2.11.3"
-aiofiles = "^0.6.0"
-websockets = "^8.1"
+python = "^3.11"
+bson = "^0.5.10"
+passlib = "^1.7.4"
+flask = "^3.0.0"
+flask-socketio = "^5.3.6"
+eventlet = "^0.34.1"
+pymongo = "^4.6.1"
+flask-login = "^0.6.3"
 
-[tool.poetry.dev-dependencies]
-httpx = "^0.17.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

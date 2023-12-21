@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Chat App</title>
+</head>
+<body>
+<h1>Chat WebSocket</h1>
+    <h3>Usuario atual: {% if current_user.is_authenticated %}{{current_user.username}}{% else %}Anonimo{% endif %}</h3>
+<form>
+    <div>
+        <label>Enter your username:</label>
+        <input type="text" name="usuario">
+    </div>
+    <div>
+        <label>Enter room id:</label>
+        <input type="text" name="room">
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+{% if current_user.is_authenticated %}
+    <h3>My rooms</h3>
+    <ul>
+        {% for room in rooms %}
+            <li><a href="/rooms/{{ room._id.room_id }}">{{ room.room_number }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+</body>
+</html>
